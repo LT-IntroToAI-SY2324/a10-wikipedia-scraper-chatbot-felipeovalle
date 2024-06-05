@@ -112,23 +112,62 @@ def get_birth_date(name: str) -> str:
 
     return match.group("birth")
 
-def get_death_date(name: str) -> str:
-    """Gets birth date of the given person
+def get_death_age(name: str) -> str:
+    """Gets death date of the given person
 
     Args:
         name - name of the person
 
     Returns:
-        birth date of the given person
+        death age of the given person
     """
     infobox_text = clean_text(get_first_infobox_text(get_page_html(name)))
-    pattern = r"(?:Died)(?P<death>\d{1} \[A-Za-z0-9]+ \d{4})"
+    #print(infobox_text)
+    pattern = r"(?:aged)(?P<age>\s[0-9]+)"
     error_text = (
-        "Page infobox has no establishment information (at least none in xxxx-xx-xx format)"
+        "Page infobox has no establishment information (at least none in Date Month Year format)"
     )
     match = get_match(infobox_text, pattern, error_text)
 
-    return match.group("death")
+    return match.group("age")
+
+def get_children(name: str) -> str:
+    """Gets death date of the given person
+
+    Args:
+        name - name of the person
+
+    Returns:
+        death age of the given person
+    """
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(name)))
+    #print(infobox_text)
+    pattern = r"(?:Children)(?P<children>\s[0-9]+)"
+    error_text = (
+        "Page infobox has no establishment information on amount of children"
+    )
+    match = get_match(infobox_text, pattern, error_text)
+
+    return match.group("children")
+
+def get_spouse(name: str) -> str:
+    """Gets death date of the given person
+
+    Args:
+        name - name of the person
+
+    Returns:
+        death age of the given person
+    """
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(name)))
+    #print(infobox_text)
+    pattern = r"(?:Spouse)(?P<spouse>\s([A-Za-z]+\s)+)"
+    error_text = (
+        "Page infobox has no establishment information on amount of children"
+    )
+    match = get_match(infobox_text, pattern, error_text)
+
+    return match.group("spouse")
 # below are a set of actions. Each takes a list argument and returns a list of answers
 # according to the action and the argument. It is important that each function returns a
 # list of the answer(s) and not just the answer itself.
@@ -145,7 +184,7 @@ def birth_date(matches: List[str]) -> List[str]:
     """
     return [get_birth_date(" ".join(matches))]
 
-def death_date(matches: List[str]) -> List[str]:
+def death_age(matches: List[str]) -> List[str]:
     """Returns birth date of named person in matches
 
     Args:
@@ -154,7 +193,29 @@ def death_date(matches: List[str]) -> List[str]:
     Returns:
         birth date of named person
     """
-    return [get_death_date(" ".join(matches))]
+    return [get_death_age(" ".join(matches))]
+
+def children(matches: List[str]) -> List[str]:
+    """Returns birth date of named person in matches
+
+    Args:
+        matches - match from pattern of person's name to find birth date of
+
+    Returns:
+        birth date of named person
+    """
+    return [get_children(" ".join(matches))]
+
+def spouse(matches: List[str]) -> List[str]:
+    """Returns birth date of named person in matches
+
+    Args:
+        matches - match from pattern of person's name to find birth date of
+
+    Returns:
+        birth date of named person
+    """
+    return [get_spouse(" ".join(matches))]
 
 
 def polar_radius(matches: List[str]) -> List[str]:
@@ -184,7 +245,10 @@ Action = Callable[[List[str]], List[Any]]
 pa_list: List[Tuple[Pattern, Action]] = [
     ("when was % born".split(), birth_date),
     ("what is the polar radius of %".split(), polar_radius),
-    ("when did % _die".split(), death_date),
+    ("what age did % die".split(), death_age),
+    ("how many kids did % have".split(), children),
+    ("who was the spouse of %".split(), spouse),
+
     (["bye"], bye_action),
 ]
 
